@@ -23,8 +23,13 @@ authRouter
     if(!match){
       return res.status(400).json({error: 'Incorrect email or password'})
     }
+    console.log(user)
     const sub = loginUser.email;
-    const payload = {user_id: user.id};
+    const payload = {
+      user_id: user.id,
+      full_name: user.full_name,
+      email: user.email
+    };
     const serializedUser = {
       id: user.id,
       full_name: user.full_name,

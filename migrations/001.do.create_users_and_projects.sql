@@ -12,7 +12,7 @@ create table projects (
   title text not null,
   project_description text not null,
   date_created timestamptz not null default now(),
-  date_modifed timestamptz
+  date_modified timestamptz
 );
 
 create table user_projects (
