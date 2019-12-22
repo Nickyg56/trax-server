@@ -7,6 +7,7 @@ const { NODE_ENV } = require('./config');
 const registrationRouter = require('./registration/registration-router');
 const authRouter = require('./auth/auth-router');
 const projectsRouter = require('./projects/projects-router');
+const eventsRouter = require('./events/events-router');
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use(cors());
 app.use('/api/register', registrationRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);
+app.use('/api/events', eventsRouter);
+
 
 // eslint-disable-next-line no-unused-vars
 app.use(function errorHandler(error, req, res, next){
