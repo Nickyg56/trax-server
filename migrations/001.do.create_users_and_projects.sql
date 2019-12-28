@@ -16,6 +16,7 @@ create table projects (
 );
 
 create table user_projects (
+  id serial primary key,
   project_id integer 
     references projects(id) on delete cascade not null,
   user_id integer
