@@ -16,8 +16,7 @@ eventsRouter
 
       const startDateObj = new Date(`${month} ${day}, ${year} ${startTime}:00`);
       const endDateObj = new Date(`${month} ${day}, ${year} ${endTime}:00`);
-
-      
+  
       const userEvent = {
         title,
         event_description: description,
@@ -29,6 +28,7 @@ eventsRouter
         if(!value) return res.status(400).json({error: `Missing ${key} in request body`})
       }
 
+      userEvent.date = startDateObj.toISOString().slice(0 , 10);
       userEvent.created_by = req.user.full_name;
       userEvent.user_id = req.user.id;
       userEvent.project_id = parseInt(projectId);
@@ -48,6 +48,64 @@ eventsRouter
       next(e)
     }
   });
+
+  eventsRouter
+    .get('/:projectId', requireAuth, jsonBodyParser, async (req, res, next) => {
+      try {
+        const {projectId} = req.params;
+
+        const events = await EventService.getEventsByProjectId(req.app.get('db') , projectId)
+        
+        if(!events){
+          res.status(204).end()
+        }
+
+        const formattedEvents = events.map(event => {
+          return {
+            id: event.id,
+            title: event.title,
+            description: event.event_description,
+            start: event.start_time,
+            end: event.end_time,
+            createdBy: event.created_by,
+            dateCreated: event.date_created,
+            dateModified: event.date_modified,
+            lastModifiedBy: event.last_modified_by,
+            projectId: event.project_id,
+          }
+        })
+
+        res.status(201).json(formattedEvents);
+      } catch(e){
+        next(e)
+      }
+    })
+
+  eventsRouter  
+    .get('/calender/:projectId', requireAuth, jsonBodyParser, async (req, res, next) => {
+      try {
+        const { projectId } = req.params;
+        const { month, year} = req.query;
+
+        let formattedMonth = parseInt(month)
+        if(formattedMonth < 10){
+          formattedMonth = `0${formattedMonth}`;
+        }
+        const searchString = `${year}-${formattedMonth}`;
+
+        console.log('searchString', searchString)
+
+        const events = await EventService.getEventsByMonth(
+          req.app.get('db'), 
+          projectId,
+          searchString)
+
+
+        res.status(200).send(events);
+      } catch(e) {
+        next(e);
+      }
+    })
 
   eventsRouter
     .post('/:projectId/unavailable', jsonBodyParser, requireAuth,  async (req, res, next) => {
@@ -83,13 +141,22 @@ eventsRouter
       .get('/unavailable/:projectId/:year/:month', requireAuth, jsonBodyParser, async (req, res, next) => {
         try {
           const {projectId, year, month} = req.params;
+          //validate
 
-          console.log(projectId, year, month)
-          //this is where you left off, sending dummy data for now but front end is sending in 
-          // this information correctly. Now I need to write an event-service method to get all of the days 
-          //from the db.
+          //format month for uniform search
+          let newMonth = month;
+          if(parseInt(newMonth) < 10){
+            newMonth = '0' + month;
+          }
 
-          res.status(200).json([2 ,5 ,26]);
+          const searchString = `${year}-${newMonth}`;
+          console.log(searchString)
+
+          const daysUnavailable = await EventService.getUnavailableDays(req.app.get('db'), projectId, searchString)
+          
+          console.log(daysUnavailable);
+
+          res.status(200).json(daysUnavailable);
 
 
         } catch(e) {
