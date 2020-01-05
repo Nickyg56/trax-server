@@ -19,7 +19,7 @@ const ProjectService = {
       title: project.title,
       description: project.project_description,
       dateCreated: project.date_created,
-      dateModified: project.date_modifed, //fix "modified typo"
+      dateModified: project.date_modified, //fix "modified typo"
       role: userProject.role,
       isAdmin: userProject.is_admin,
     };

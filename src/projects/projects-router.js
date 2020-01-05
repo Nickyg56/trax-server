@@ -50,9 +50,6 @@ projectsRouter
     try {
       const userProjects = await ProjectService.getUserProjects(req.app.get('db'), req.user.id)
 
-      console.log(req.user.id)
-      console.log(userProjects);
-
       res.status(200).json(userProjects);
 
     } catch (e) {

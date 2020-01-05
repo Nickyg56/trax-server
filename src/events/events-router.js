@@ -1,6 +1,7 @@
 const express = require('express');
 const eventsRouter = express.Router();
 const EventService = require('./events-service');
+const ProjectService = require('../projects/project-service');
 
 const jsonBodyParser = express.json();
 
@@ -33,21 +34,60 @@ eventsRouter
       userEvent.user_id = req.user.id;
       userEvent.project_id = parseInt(projectId);
 
-      //insert user_event for each member if the project
+      
 
+      //creates the new event
       newEvent = await EventService.insertEvent(
         req.app.get('db'),
         userEvent
       )
 
+      //gets all users for this project 
+      const projectUsers = await ProjectService.getProjectUsersByProjectId(
+        req.app.get('db'),
+        projectId
+      )
+
+      //inserts a user_event for each member if the project
+      const userEvents = await EventService.insertUserEvents(
+        req.app.get('db'),
+        newEvent.id,
+        projectUsers,
+        req.user.id
+      )
+
       res.status(201).json(newEvent)
-
-
      
     } catch(e){
       next(e)
     }
   });
+
+  eventsRouter
+    .get('/user_events/:userId', requireAuth, async (req, res, next) => {
+      const { userId } = req.params;
+      if(!userId){
+        return res.status(400).json({error: 'Missing user_id in request'})
+      }
+      try {
+
+        const events = await EventService.getEventsByUserId(
+          req.app.get('db'),
+          userId
+        )
+
+        if(!events){
+          res.status(204).end()
+        }
+
+        
+        const formattedEvents = EventService.formatEvents(events);
+
+        res.status(200).json(formattedEvents);
+      } catch(e) {
+        next(e)
+      }
+    });
 
   eventsRouter
     .get('/:projectId', requireAuth, jsonBodyParser, async (req, res, next) => {
@@ -60,20 +100,7 @@ eventsRouter
           res.status(204).end()
         }
 
-        const formattedEvents = events.map(event => {
-          return {
-            id: event.id,
-            title: event.title,
-            description: event.event_description,
-            start: event.start_time,
-            end: event.end_time,
-            createdBy: event.created_by,
-            dateCreated: event.date_created,
-            dateModified: event.date_modified,
-            lastModifiedBy: event.last_modified_by,
-            projectId: event.project_id,
-          }
-        })
+        const formattedEvents = EventService.formatEvents(events);
 
         res.status(201).json(formattedEvents);
       } catch(e){
@@ -93,7 +120,6 @@ eventsRouter
         }
         const searchString = `${year}-${formattedMonth}`;
 
-        console.log('searchString', searchString)
 
         const events = await EventService.getEventsByMonth(
           req.app.get('db'), 
@@ -150,11 +176,9 @@ eventsRouter
           }
 
           const searchString = `${year}-${newMonth}`;
-          console.log(searchString)
 
           const daysUnavailable = await EventService.getUnavailableDays(req.app.get('db'), projectId, searchString)
           
-          console.log(daysUnavailable);
 
           res.status(200).json(daysUnavailable);
 
