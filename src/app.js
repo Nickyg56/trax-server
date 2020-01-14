@@ -8,6 +8,7 @@ const registrationRouter = require('./registration/registration-router');
 const authRouter = require('./auth/auth-router');
 const projectsRouter = require('./projects/projects-router');
 const eventsRouter = require('./events/events-router');
+const visitorRouter = require('./visitor/visitor-router');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/register', registrationRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/events', eventsRouter);
+app.use('/api/visitor', visitorRouter);
 
 
 // eslint-disable-next-line no-unused-vars

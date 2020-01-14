@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const EventService = {
   insertEvent(db, newEvent) {
     return db('events')
@@ -69,8 +71,9 @@ const EventService = {
         return dates.map(date => parseInt(date.date.slice(8, 10)));
       });
   },
-  formatEvents(events){
-    return events.map(event => {
+  formatEvents(events, filter = false){
+    
+    let formattedEvents = events.map(event => {
       return {
         id: event.id,
         title: event.title,
@@ -84,6 +87,19 @@ const EventService = {
         projectId: event.project_id,
       };
     });
+    if(filter){
+      formattedEvents = this.filterEventsBeforeCurrentDate(formattedEvents);
+    }
+    return formattedEvents;
+  },
+  filterEventsBeforeCurrentDate(events){
+    const today = moment().format().slice(0, 10);
+    const todayNum = parseInt(today.split('-').reduce((a, b) => a + b));
+    //compares date of event to the current date
+    const newEvents = events.filter(event => 
+      parseInt(event.start.toISOString().slice(0, 10).split('-').reduce((a, b) => a + b)) >= todayNum
+    );
+    return newEvents;
   },
 };
 

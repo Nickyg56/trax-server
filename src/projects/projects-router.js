@@ -58,6 +58,28 @@ projectsRouter
   })
 
 projectsRouter
+  .get('/search', requireAuth, async (req, res, next) => {
+    try {
+      console.log('search endpoint REACHED');
+      const {query} = req.query
+
+      console.log(typeof query)
+
+      let projects = await ProjectService.getProjectsByProjectTitle(
+        req.app.get('db'),
+        query
+      )
+
+      console.log(projects)
+
+      req.app.get('io').emit('project search active', (projects))
+      res.status(200).end()
+    } catch(e) {
+      next(e)
+    }
+  })
+
+projectsRouter
   .get('/:projectId', requireAuth, async (req, res, next) => {
     try {
       const {projectId} = req.params;
@@ -92,5 +114,24 @@ projectsRouter
       next(e)
     }
   })
+
+  projectsRouter
+    .delete('/:projectId', requireAuth, async (req, res, next) => {
+      try {
+        const {projectId} = req.params
+
+        console.log('Delete reached', projectId)
+
+        await ProjectService.deleteProjectById(
+          req.app.get('db'),
+          projectId
+        )
+
+
+        res.status(202).end()
+      } catch(e) {
+        next(e)
+      }
+    })
 
 module.exports = projectsRouter;

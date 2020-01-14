@@ -2,6 +2,7 @@ const express = require('express');
 const eventsRouter = express.Router();
 const EventService = require('./events-service');
 const ProjectService = require('../projects/project-service');
+const moment = require('moment');
 
 const jsonBodyParser = express.json();
 
@@ -18,6 +19,7 @@ eventsRouter
       const startDateObj = new Date(`${month} ${day}, ${year} ${startTime}:00`);
       const endDateObj = new Date(`${month} ${day}, ${year} ${endTime}:00`);
   
+      //this should be project event
       const userEvent = {
         title,
         event_description: description,
@@ -81,7 +83,11 @@ eventsRouter
         }
 
         
-        const formattedEvents = EventService.formatEvents(events);
+
+
+
+        
+        const formattedEvents = EventService.formatEvents(events, true);
 
         res.status(200).json(formattedEvents);
       } catch(e) {
@@ -100,7 +106,10 @@ eventsRouter
           res.status(204).end()
         }
 
-        const formattedEvents = EventService.formatEvents(events);
+        
+        const formattedEvents = EventService.formatEvents(events, true);
+
+        // const dateFilteredEvents = EventService.filterEventsBeforeCurrentDate(formattedEvents);
 
         res.status(201).json(formattedEvents);
       } catch(e){

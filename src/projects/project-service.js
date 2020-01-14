@@ -7,6 +7,20 @@ const ProjectService = {
       .returning('*')
       .then(res => res[0]);
   },
+  getProjectsByProjectTitle(db, title){
+    return db('projects')
+      .select('*')
+      .where('title', 'ilike', `${title}%`)
+      .then(res => res.map(project =>  {
+        return {
+          id: project.id,
+          title: project.title,
+          description: project.project_description,
+          dateCreated: project.date_created,
+          dateModified: project.date_modified
+        };
+      }));
+  },
   insertUserProject(db, newUserProject) {
     return db('user_projects')
       .insert(newUserProject)
@@ -52,6 +66,12 @@ const ProjectService = {
       .join('projects', 'projects.id', 'user_projects.project_id')
       .where({ project_id })
       .first();
+  },
+  deleteProjectById(db, project_id){
+    return db('projects')
+      .where('id', project_id)
+      .delete();
+
   },
   getProjectUsersByProjectId(db, project_id){
     return db

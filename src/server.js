@@ -9,6 +9,9 @@ const db = knex({
 
 app.set('db', db);
 
-app.listen(PORT, () => {
+let server = app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
 });
+
+const io = require('socket.io').listen(server);
+app.set('io', io); 
