@@ -61,7 +61,7 @@ projectsRouter
   .get('/search', requireAuth, async (req, res, next) => {
     try {
       console.log('search endpoint REACHED');
-      const {query} = req.query
+      const { query } = req.query
 
       console.log(typeof query)
 
@@ -78,6 +78,48 @@ projectsRouter
       next(e)
     }
   })
+
+  projectsRouter
+    .get('/requests/:projectId', requireAuth, async (req, res, next) => {
+
+        //need to get all projects in which req.user.id is an admin 
+        //then need to search for join_requests from those projects and send them in the response
+
+      try {
+
+      } catch(e) {
+
+      }
+    })
+
+  projectsRouter
+    .get('/requests/user/:userId', requireAuth, async (req, res, next) => {
+      //this endpoint can be used to see which requests you have sent out as a user
+      //Get join requests by user id
+      //user id in params
+      //validates by comparing the id to the req.user.id from auth middleware
+      const { userId } = req.params;
+
+      console.log( typeof userId)
+
+      if((parseInt(userId)) !== req.user.id){
+        res.status(404).json({error: 'unauthorized request'})
+      }
+
+      try {
+
+        const requests = await ProjectService.getProjectJoinRequestsByUserId(
+          req.app.get('db'),
+          userId
+        )
+
+        console.log(requests)
+
+        res.status(200).json(requests)
+      } catch(e){
+        next(e)
+      }
+    })
 
 projectsRouter
   .get('/:projectId', requireAuth, async (req, res, next) => {

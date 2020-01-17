@@ -21,6 +21,11 @@ const ProjectService = {
         };
       }));
   },
+  getProjectJoinRequestsByUserId(db, userId){
+    return db('join_requests')
+      .select('*')
+      .where('user_id', userId);
+  },
   insertUserProject(db, newUserProject) {
     return db('user_projects')
       .insert(newUserProject)

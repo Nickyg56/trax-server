@@ -2,6 +2,7 @@ const express = require('express');
 const visitorRouter = express.Router();
 const VisitorService = require('./visitor-service');
 const jsonBodyParser = express.json();
+const { requireAuth } = require('../middleware/jwt-auth');
 
 
 
@@ -14,6 +15,8 @@ visitorRouter
       if(!projectId){
         return res.status(400).json({error: 'Missing Project id in request'})
       }
+
+      //check if user has already requested to join a project
 
       const projectData = await VisitorService.getVisitorProjectData(
         req.app.get('db'),
@@ -69,6 +72,40 @@ visitorRouter
       next(e)
     }
   })
+
+visitorRouter
+.post('/:projectId', jsonBodyParser, requireAuth,  async (req, res, next) => {
+  const {projectId} = req.params
+
+  try {
+
+    console.log(req.user.id, projectId)
+
+    //message will later be sent in body
+
+    const request = {
+      user_id: req.user.id,
+      project_id: projectId,
+      message: 'PLease let me join. PLEASE!!!!',
+      user_name: req.user.full_name
+    }
+
+    const newRequest = await VisitorService.insertJoinRequest(
+      req.app.get('db'),
+      request
+    )
+
+    console.log(newRequest)
+
+    res.status(201).json({message: 'Join request sent'})
+
+
+  } catch(e) {
+    next(e)
+  }
+})
+
+
 
 
   module.exports = visitorRouter;

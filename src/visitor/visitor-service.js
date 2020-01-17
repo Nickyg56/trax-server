@@ -25,6 +25,12 @@ const VisitorService = {
       .select('*')
       .from('events')
       .where('events.project_id', projectId);
+  },
+  insertJoinRequest(db, request){
+    return db('join_requests')
+      .insert(request)
+      .returning('*')
+      .then(res => res[0]);
   }
 
 };
