@@ -79,16 +79,61 @@ projectsRouter
     }
   })
 
-  projectsRouter
-    .get('/requests/:projectId', requireAuth, async (req, res, next) => {
 
+  projectsRouter
+    .post('/request/accept', requireAuth, jsonBodyParser, async (req, res, next) => {
+
+      try {
+        const {role, userId, projectId} = req.body
+
+        console.log(role, userId, projectId)
+
+        await ProjectService.insertUserProject(
+          req.app.get('db'),
+          {
+            project_id: projectId,
+            user_id: userId,
+            is_admin: false,
+            role,
+          }
+        )
+
+        res.status(201).json({message: 'request accepted'})
+      } catch(e){
+        next(e)
+      }
+    })
+
+
+
+  projectsRouter
+    .get('/requests', requireAuth, async (req, res, next) => {
         //need to get all projects in which req.user.id is an admin 
         //then need to search for join_requests from those projects and send them in the response
 
       try {
 
-      } catch(e) {
+        const adminProjects = await ProjectService.getUserProjectsWhereUserAdmin(
+          req.app.get('db'),
+          req.user.id
+        )
 
+        const projectRequests = []
+
+        for (let i = 0; i < adminProjects.length; i ++){
+          let requests = await ProjectService.getProjectJoinRequestsByProjectId(
+                req.app.get('db'),
+                adminProjects[i].id
+             )
+              if(requests.length > 0){
+                projectRequests.push([adminProjects[i].title, requests])
+              }
+        }
+
+        res.status(200).json(projectRequests)
+
+      } catch(e) {
+        next(e)
       }
     })
 
@@ -113,7 +158,6 @@ projectsRouter
           userId
         )
 
-        console.log(requests)
 
         res.status(200).json(requests)
       } catch(e){

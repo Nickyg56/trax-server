@@ -26,6 +26,31 @@ const ProjectService = {
       .select('*')
       .where('user_id', userId);
   },
+  getProjectJoinRequestsByProjectId(db, projectId){
+    return db
+      .select(
+        'join_requests.project_id AS projectId',
+        'join_requests.message AS message',
+        'join_requests.user_id AS userId',
+        'join_requests.user_name AS userName',
+        'projects.title AS title'
+      )
+      .from('join_requests')
+      .join('projects', 'projects.id', 'join_requests.project_id')
+      .where('project_id', projectId);
+
+  },
+  getUserProjectsWhereUserAdmin(db, userId){
+    return db
+      .select(
+        'user_projects.project_id AS id',
+        'projects.title AS title'
+      )
+      .from('user_projects')
+      .join('projects', 'projects.id', 'user_projects.id')
+      .where('user_id', userId)
+      .where('is_admin', true);
+  },
   insertUserProject(db, newUserProject) {
     return db('user_projects')
       .insert(newUserProject)
