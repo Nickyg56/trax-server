@@ -9,8 +9,7 @@ const { requireAuth } = require('../middleware/jwt-auth');
 visitorRouter
   .get('/:projectId', async (req, res, next) => {
     try {
-      const {projectId} = req.params;
-
+      const { projectId } = req.params;
 
       if(!projectId){
         return res.status(400).json({error: 'Missing Project id in request'})
@@ -76,17 +75,19 @@ visitorRouter
 visitorRouter
 .post('/:projectId', jsonBodyParser, requireAuth,  async (req, res, next) => {
   const {projectId} = req.params
+  const {message} = req.body
 
   try {
 
-    console.log(req.user.id, projectId)
+    console.log(req.user.id, projectId, message)
 
-    //message will later be sent in body
+    //xss message
+
 
     const request = {
       user_id: req.user.id,
       project_id: projectId,
-      message: 'PLease let me join. PLEASE!!!!',
+      message,
       user_name: req.user.full_name
     }
 
