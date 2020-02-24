@@ -81,7 +81,7 @@ projectsRouter
 
 
   projectsRouter
-    .post('/request/accept', requireAuth, jsonBodyParser, async (req, res, next) => {
+    .post('/requests/accept', requireAuth, jsonBodyParser, async (req, res, next) => {
 
       try {
         const {role, userId, projectId} = req.body
@@ -103,6 +103,28 @@ projectsRouter
         next(e)
       }
     })
+
+    projectsRouter
+      .delete('/requests/reject/:requestId', requireAuth, async (req, res, next) => {
+        try {
+          const {requestId} = req.params;
+
+
+          if(!requestId){
+            res.status(400).json({error: 'Missing request id'})
+          }
+
+          await ProjectService.deleteJoinRequest(
+            req.app.get('db'),
+            requestId
+          )
+
+          res.status(204).end()
+        }
+        catch(e) {
+          next(e)
+        }
+      })
 
 
 

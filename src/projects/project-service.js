@@ -29,6 +29,7 @@ const ProjectService = {
   getProjectJoinRequestsByProjectId(db, projectId){
     return db
       .select(
+        'join_requests.id AS id',
         'join_requests.project_id AS projectId',
         'join_requests.message AS message',
         'join_requests.user_id AS userId',
@@ -114,6 +115,11 @@ const ProjectService = {
       .from('user_projects')
       .join('users', 'users.id', 'user_projects.user_id') //???
       .where({project_id});
+  },
+  deleteJoinRequest(db, request_id){
+    return db('join_requests')
+      .where('id', request_id)
+      .delete();
   }
 };
 
